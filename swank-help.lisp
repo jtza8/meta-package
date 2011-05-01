@@ -5,6 +5,7 @@
 
 (in-package :meta-package)
 
+(internal type-specifier-arglist)
 (defgeneric type-specifier-arglist (typespec-operator)
   (:documentation
    "Return the argument list of the type specifier belonging to
@@ -21,7 +22,7 @@ additional information on the specifiers defined in ANSI Common Lisp.")
                   :not-available))
       (t :not-available))))
 
-#@(internal with-symbol)
+(internal with-symbol)
 (eval-when (:compile-toplevel)
   (defun with-symbol (name package)
     "Generate a form suitable for testing with #+."
@@ -30,7 +31,6 @@ additional information on the specifiers defined in ANSI Common Lisp.")
         '(:and)
         '(:or))))
 
-#@(internal type-specifier-arglist)
 #+#.(meta-package::with-symbol 'deftype-lamda-list 'sb-introspect)
 (defmethod type-specifier-arglist :around (typespec-operator)
   (multiple-value-bind (arglist foundp)
@@ -63,7 +63,7 @@ keywords: :BOUNDP, :FBOUNDP, :CONSTANT, :GENERIC-FUNCTION,
 
       result)))
 
-#@(internal *type-specifier-arglists*)
+(internal *type-specifier-arglists*)
 (defparameter *type-specifier-arglists*
   '((and                . (&rest type-specifiers))
     (array              . (&optional element-type dimension-spec))

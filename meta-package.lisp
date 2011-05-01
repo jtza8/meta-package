@@ -14,7 +14,7 @@
   (loop for symbol being each external-symbol in package
         collect symbol))
 
-#@(internal two-difference)
+(internal two-difference)
 (defun two-difference (less-than more-than subtrahend-list minuend-list)
   (let* ((subtrahends (sort subtrahend-list less-than))
          (minuends (sort minuend-list less-than))
@@ -38,7 +38,7 @@
                                  subtrahend (pop terms)))
         finally (return subtrahend)))
 
-#@(internal multi-union)
+(internal multi-union)
 (defun multi-union (lists &optional key (test #'eql) test-not)
   (delete-duplicates (apply #'nconc lists)
                      :key key :test test

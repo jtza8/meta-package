@@ -12,12 +12,7 @@
         (setf #1# symbols)
         (setf #1# (union symbol-list symbols)))))
 
-(defun command-reader-macro (stream subchar args)
-  (declare (ignore subchar args))
-  (let* ((symbol-list (print (read stream)))
-         (command (intern (symbol-name (pop symbol-list)) :meta-package)))
-    (ecase command
-      (internal `(ignore-symbols ',@symbol-list)))))
+(defmacro internal (&rest symbols)
+  `(apply #'ignore-symbols ',symbols))
 
-(set-dispatch-macro-character #\# #\@ #'command-reader-macro)
-(ignore-symbols 'ignore-symbols '*ignored-symbols* 'command-reader-macro)
+(internal ignore-symbols *ignored-symbols* command-reader-macro)
