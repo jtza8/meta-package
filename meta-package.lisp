@@ -38,12 +38,6 @@
                                  subtrahend (pop terms)))
         finally (return subtrahend)))
 
-(internal multi-union)
-(defun multi-union (lists &optional key (test #'eql) test-not)
-  (delete-duplicates (apply #'nconc lists)
-                     :key key :test test
-                     :test-not test-not))
-
 (defun calculate-external-symbols (package)
   (difference #'string< #'string> 
               (nominate-external-symbols package)
@@ -51,7 +45,8 @@
 
 (defmacro auto-export (package &rest forms)
   (flet ((add-external-symbols (packages)
-           (multi-union (mapcar #'list-external-symbols packages))))
+           (delete-duplicates (apply #'nconc (mapcar #'list-external-symbols
+                                                     packages)))))
     (multiple-value-bind (additives subtractives)
         (loop for form in forms
               if (eq (car form) :add-packages)
