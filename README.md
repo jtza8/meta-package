@@ -18,11 +18,8 @@ automatically export all symbols not deemed internal as above.
 
 ## Dependencies
 
-Mandatory:
-* None
-
-Optional:
-* XLUnit (for unit tests)
+* Mandatory: None
+* Optional: XLUnit (for unit tests)
 
 ## Installation
 
