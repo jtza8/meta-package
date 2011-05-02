@@ -3,7 +3,7 @@
 ; in the root directory of this project.
 
 (defpackage meta-package-lab-rat
-  (:use :cl))
+  (:use :cl :meta-package))
 (in-package :meta-package-lab-rat)
 (defparameter *symbol* :blah)
 (defun foo () ())
@@ -32,4 +32,13 @@
                      (nominate-external-symbols :meta-package-lab-rat))))
 
 (def-test-method test-difference ((test meta-package-test))
-  ())
+  (assert-equal 2 (matching-symbol-count '(2 4)
+                   (difference #'< #'> '(1 2 3 4 5) '(1 3) '(5))))
+  (assert-equal nil (difference #'< #'>)))
+
+(def-test-method test-calculate-external-symbols ((test meta-package-test))
+  (in-package :meta-package-lab-rat)
+  (meta-package:internal *symbol*)
+  (in-package :meta-package)
+  (assert-equal '(meta-package-lab-rat::foo)
+                (calculate-external-symbols :meta-package-lab-rat)))

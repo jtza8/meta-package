@@ -15,11 +15,10 @@
         collect symbol))
 
 (internal two-difference)
-(defun two-difference (less-than more-than subtrahend-list minuend-list)
-  (let* ((subtrahends (sort subtrahend-list less-than))
-         (minuends (sort minuend-list less-than))
-         (minuend (pop minuends))
-         (result '()))
+(defun two-difference (less-than more-than subtrahends minuends)
+  (setf subtrahends (sort subtrahends less-than)
+        minuends (sort minuends less-than))
+  (let ((minuend (pop minuends)) result)
     (dolist (subtrahend subtrahends result)
       again
       (cond ((null minuend) (push subtrahend result))
@@ -47,17 +46,13 @@
   (flet ((add-external-symbols (packages)
            (delete-duplicates (apply #'nconc (mapcar #'list-external-symbols
                                                      packages)))))
-    (multiple-value-bind (additives subtractives)
+    (multiple-value-bind (add-packages)
         (loop for form in forms
               if (eq (car form) :add-packages)
-              collect (cadr form) into additives else
-              if (eq (car form) :subtract-package)
-              collect (cadr form) into subtractives
+              nconc (cdr form) into add-packages
               else do (error "invalid mode ~s in AUTO-EXPORT" (car form))
-              finally (return (values additives subtractives)))
-      `(export ',(union (difference #'< #'>
-                                    (add-external-symbols additives)
-                                    (add-external-symbols subtractives))
+              finally (return add-packages))
+      `(export ',(union (add-external-symbols add-packages)
                         (calculate-external-symbols package)
                         :test #'string=)
                ,package))))
