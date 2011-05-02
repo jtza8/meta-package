@@ -42,17 +42,10 @@
               (nominate-external-symbols package)
               (gethash (find-package package) *ignored-symbols*)))
 
-(defmacro auto-export (package &rest forms)
-  (flet ((add-external-symbols (packages)
-           (delete-duplicates (apply #'nconc (mapcar #'list-external-symbols
-                                                     packages)))))
-    (multiple-value-bind (add-packages)
-        (loop for form in forms
-              if (eq (car form) :add-packages)
-              nconc (cdr form) into add-packages
-              else do (error "invalid mode ~s in AUTO-EXPORT" (car form))
-              finally (return add-packages))
-      `(export ',(union (add-external-symbols add-packages)
-                        (calculate-external-symbols package)
-                        :test #'string=)
-               ,package))))
+(defmacro auto-export (package &key add-packages)
+  `(export ',(union (delete-duplicates (apply #'append 
+                                              (mapcar #'list-external-symbols
+                                                      add-packages)))
+                    (calculate-external-symbols package)
+                    :test #'string=)
+           ,package))
