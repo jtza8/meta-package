@@ -4,15 +4,30 @@
 
 (in-package :meta-package)
 
+(defvar *internal-symbols* (make-hash-table))
+(defvar *external-symbols* (make-hash-table))
+
+(defun include-symbols (hash-table &rest symbols)
+  (let ((symbol-list #1=(gethash *package* hash-table)))
+    (if (null symbol-list)
+        (setf #1# symbols)
+        (setf #1# (union symbol-list symbols)))))
+
+(defmacro internal (&rest symbols)
+  `(apply #'include-symbols *internal-symbols* ',symbols))
+
+(defmacro external (&rest symbols)
+  `(apply #'include-symbols *external-symbols* ',symbols))
+
+(internal *internal-symbols* *external-symbols* include-symbols 
+          type-specifier-arglist with-symbol *type-specifier-arglists*
+          classify-symbol)
+
 (defun nominate-external-symbols (package)
   (delete-if (complement #'classify-symbol)
              (sort (loop for symbol being each present-symbol in package
                          collect symbol)
                    #'string<)))
-
-(defun list-external-symbols (package)
-  (loop for symbol being each external-symbol in package
-        collect symbol))
 
 (internal two-difference)
 (defun two-difference (less-than more-than subtrahends minuends)
@@ -37,15 +52,17 @@
                                  subtrahend (pop terms)))
         finally (return subtrahend)))
 
-(defun calculate-external-symbols (package)
-  (difference #'string< #'string> 
-              (nominate-external-symbols package)
-              (gethash (find-package package) *ignored-symbols*)))
-
 (defmacro auto-export (package &key add-packages)
-  `(export ',(union (delete-duplicates (apply #'append 
-                                              (mapcar #'list-external-symbols
-                                                      add-packages)))
-                    (calculate-external-symbols package)
-                    :test #'string=)
-           ,package))
+  (flet ((list-external-symbols (package)
+            (loop for symbol being each external-symbol in package
+               collect symbol)))
+    `(export ',(union (delete-duplicates (apply #'append 
+                                                (mapcar #'list-external-symbols
+                                                        add-packages)))
+                      (union (difference #'string< #'string> 
+                                         (nominate-external-symbols package)
+                                         (gethash (find-package package)
+                                                  *internal-symbols*))
+                             (gethash (find-package package)
+                                      *external-symbols*)))
+             ,package)))
